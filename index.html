@@ -7,32 +7,11 @@
     <title>RTTS - Zegar</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
-        :root { 
-            --bg-color: #ffffff; 
-            --ui-white: #ffffff; 
-        }
-        
-        html, body {
-            margin: 0; padding: 0; width: 100%; 
-            height: 100vh; height: 100svh; 
-            background-color: var(--bg-color);
-            transition: background-color 0.5s ease;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        :root { --bg-color: #ffffff; --ui-white: #ffffff; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100vh; height: 100svh; background-color: var(--bg-color); transition: background-color 0.5s ease; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
         body.dark-mode { --bg-color: #121212; }
-
-        model-viewer { 
-            width: 100%; height: 100%; 
-            background-color: transparent; 
-            outline: none; display: block;
-        }
-
-        model-viewer::part(default-ar-button) {
-            display: none !important;
-        }
+        model-viewer { width: 100%; height: 100%; background-color: transparent; outline: none; display: block; }
+        model-viewer::part(default-ar-button) { display: none !important; }
 
         .ui-element {
             position: absolute; background: none; border: none; padding: 0;
@@ -45,10 +24,7 @@
             outline: none;
         }
 
-        .brand-btn { 
-            top: 32px; font-weight: 700; font-size: 15px; 
-            letter-spacing: 0.2em; text-transform: uppercase;
-        }
+        .brand-btn { top: 32px; font-weight: 700; font-size: 15px; letter-spacing: 0.2em; text-transform: uppercase; }
         .brand-label { left: 32px; }
         .brand-czasowniki { right: 32px; text-align: right; }
 
@@ -71,24 +47,14 @@
         .icon-btn { width: 28px; height: 28px; bottom: 40px; display: flex; align-items: center; justify-content: center; }
         .icon-btn svg { width: 20px; height: 20px; }
         
-        #ar-label { 
-            font-weight: 800; font-size: 16px; 
-            display: flex; align-items: center; justify-content: center; 
-            width: 20px; height: 20px;
-        }
-
+        #ar-label { font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
         .btn-theme { left: 32px; }
         .btn-pause { left: 36%; transform: translateX(-50%); }
         .btn-action { left: 63%; transform: translateX(-50%); }
         .btn-reset { right: 32px; }
 
         @media (min-width: 769px) {
-            .brand-btn { 
-                font-size: 19px; 
-                top: 40px; 
-                font-weight: 500;
-                letter-spacing: 0.25em;
-            }
+            .brand-btn { font-size: 19px; top: 40px; font-weight: 500; letter-spacing: 0.25em; }
             .info-panel { font-size: 16px; top: 85px; }
             #panel-czasowniki { max-width: 500px; }
             .icon-btn { width: 32px; height: 32px; }
@@ -136,7 +102,7 @@
         camera-controls disable-pan
         shadow-intensity="1" shadow-softness="1"
         exposure="1.6" environment-intensity="1.8"
-        autoplay auto-rotate rotation-per-second="0deg"
+        autoplay
         camera-orbit="0deg 75deg 180%" 
         camera-target="0m 0.08m 0m"
         min-camera-orbit="auto auto 100%" 
@@ -149,31 +115,20 @@
             mobileOrbit: "0deg 75deg 165%",
             desktopOrbit: "0deg 75deg 180%",
             mobileTarget: "0m 0.1m 0m",
-            desktopTarget: "0m 0.08m 0m",
-            rotationSpeed: 10
+            desktopTarget: "0m 0.08m 0m"
         };
 
         const mv = document.querySelector('#clock-model');
-
-        // Bezpieczne pobieranie elementów
         const getEl = (id) => document.getElementById(id);
 
-        mv.addEventListener('load', () => {
-            let s = 0;
-            const accel = setInterval(() => {
-                s += 0.4;
-                mv.rotationPerSecond = `${s}deg`;
-                if (s >= CONFIG.rotationSpeed) clearInterval(accel);
-            }, 100);
-        });
-
+        // Reset widoku
         getEl('reset-view').onclick = () => {
             const isMob = window.innerWidth < 768;
             mv.cameraOrbit = isMob ? CONFIG.mobileOrbit : CONFIG.desktopOrbit;
             mv.cameraTarget = isMob ? CONFIG.mobileTarget : CONFIG.desktopTarget;
-            mv.fieldOfView = "auto";
         };
 
+        // Obsługa paneli informacyjnych
         const togglePanel = (showId, hideId) => {
             const show = getEl(showId);
             const hide = getEl(hideId);
@@ -182,42 +137,4 @@
         };
 
         getEl('toggle-rtts').onclick = () => togglePanel('panel-rtts', 'panel-czasowniki');
-        getEl('toggle-czasowniki').onclick = () => togglePanel('panel-czasowniki', 'panel-rtts');
-
-        getEl('theme-toggle').onclick = () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            mv.exposure = isDark ? "1.6" : "2.8";
-            document.querySelector('meta[name="theme-color"]').setAttribute('content', isDark ? '#121212' : '#ffffff');
-        };
-
-        const pauseBtn = getEl('pause-toggle');
-        pauseBtn.onclick = () => {
-            const isP = pauseBtn.dataset.paused === "true";
-            if (!isP) {
-                mv.pause();
-                getEl('icon-pause').style.display = 'none';
-                getEl('icon-play').style.display = 'block';
-                pauseBtn.dataset.paused = "true";
-            } else {
-                mv.play();
-                getEl('icon-pause').style.display = 'block';
-                getEl('icon-play').style.display = 'none';
-                pauseBtn.dataset.paused = "false";
-            }
-        };
-
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-            getEl('ar-label').style.display = 'flex';
-            getEl('action-toggle').onclick = () => mv.activateAR();
-        } else {
-            getEl('fs-icon').style.display = 'block';
-            getEl('action-toggle').onclick = () => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else document.exitFullscreen();
-            };
-        }
-    </script>
-</body>
-</html>
+        getEl('toggle-czasowniki
